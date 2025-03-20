@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CreateUserRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
 class UserController extends Controller
@@ -12,46 +14,36 @@ class UserController extends Controller
     
     public function index()
     {
-       $usuarios= User::all();
-       return response()->json($usuarios, 200);
+        $usuarios= User::paginate(10);
+        return response()->json($usuarios, 200);
     }
 
-   
-    public function store(Request $request)
+    public function store(CreateUserRequest $request)
     {
-       $validator=Validator::make($request->all(),[
-            "name"=> "required|min:3|max:255|string",
-            "email"=> "required|email|unique:users,email",
-            "password"=> "required|string|min:4",
-       ]);
+        $usuario= User::create([
+                "name"=>$request->name,
+                "email"=>$request->email,
+                "password"=> Hash::make($request->password) ,
+        ]);
 
-       if($validator->fails()){
-            $data=[
-                "mensaje"=> "Error en la validacion de datos",
-                "errores"=> $validator->errors(),
-            ];
-            return response()->json($data,400);
-       }
-
-       $usuario= User::create([
-            "name"=>$request->name,
-            "email"=>$request->email,
-            "password"=>$request->password,
-       ]);
-
-       if(!$usuario){
+        if(!$usuario){
             $data=[
                 "mensaje"=>"Error al crear usuario",
                 "status"=> 500,
             ];
             return response()->json($data,500);
-       }
+        }
 
-       return response()->json($usuario,201);
+        $data=[
+            "mensaje"=>"Usuario creado con exito",
+            "status"=>201,
+            "token"=>$usuario->createToken('TOKEN API')->plainTextToken,
+        ];
+
+        return response()->json($data,201);
 
     }
 
-   
     public function show($identificador)
     {
         $usuario= User::find($identificador);
@@ -91,22 +83,21 @@ class UserController extends Controller
                 "errores"=> $validator->errors(),
             ];
             return response()->json($data,400);
-       }
+        }
 
-       $usuario->name=$request->name;
-       $usuario->email=$request->email;
-       $usuario->password=$request->password;
+        $usuario->name=$request->name;
+        $usuario->email=$request->email;
+        $usuario->password=$request->password;
 
-       $usuario->save();
+        $usuario->save();
 
-       $data=[
-        "mensaje"=>"El usuario ha sido actualizado con exito",
-        "status"=>200,
-       ];
-       return response()->json($data,200);
+        $data=[
+            "mensaje"=>"El usuario ha sido actualizado con exito",
+            "status"=>200,
+        ];
+        return response()->json($data,200);
     }
 
-   
     public function destroy($identificador)
     {
         $usuario= User::find($identificador);
@@ -148,25 +139,65 @@ class UserController extends Controller
                 "errores"=> $validator->errors(),
             ];
             return response()->json($data,400);
-       }
+        }
 
-      if($request->has("name")){
-        $usuario->name=$request->name;
-      }
-      if($request->has("email")){
-        $usuario->email=$request->email;
-      }
-      if($request->has("password")){
-        $usuario->password=$request->password;
-      }
+        if($request->has("name")){
+            $usuario->name=$request->name;
+        }
+        if($request->has("email")){
+            $usuario->email=$request->email;
+        }
+        if($request->has("password")){
+            $usuario->password=$request->password;
+        }
 
-      $usuario->save();
+        $usuario->save();
 
-       $data=[
-        "mensaje"=>"El usuario ha sido actualizado con exito",
-        "status"=>200,
-       ];
-       return response()->json($data,200);
-       
+        $data=[
+            "mensaje"=>"El usuario ha sido actualizado con exito",
+            "status"=>200,
+        ];
+        return response()->json($data,200);
+        
+    }
+
+    public function makeAdmin($identificador)
+    {
+        $usuario=User::find($identificador);
+        if(!$usuario){
+            $data=[
+                "mensaje"=> "Usuario no encontrado",
+                "status"=> 400,
+            ];
+            return response()->json($data,400);
+        }
+        $usuario->rol="admin";
+        $usuario->save();
+
+        $data=[
+            "mensaje"=>"El usuario ha sido convertido en administrador con exito",
+            "status"=>200,
+        ];
+        return response()->json($data,200);
+    }
+
+    public function banUser($identificador)
+    {
+        $usuario=User::find($identificador);
+        if(!$usuario){
+            $data=[
+                "mensaje"=> "Usuario no encontrado",
+                "status"=> 400,
+            ];
+            return response()->json($data,400);
+        }
+        $usuario->is_banned=true;
+        $usuario->save();
+
+        $data=[
+            "mensaje"=>"El usuario ha sido baneado con exito",
+            "status"=>200,
+        ];
+        return response()->json($data,200);
     }
 }
