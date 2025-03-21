@@ -171,6 +171,13 @@ class UserController extends Controller
             ];
             return response()->json($data,400);
         }
+        if($usuario->rol="admin"){
+            $data=[
+                "mensaje"=> "El usuario ya es administrador",
+                "status"=> 400,
+            ];
+            return response()->json($data,400);
+        }
         $usuario->rol="admin";
         $usuario->save();
 
@@ -191,11 +198,48 @@ class UserController extends Controller
             ];
             return response()->json($data,400);
         }
+
+        if($usuario->is_banned){
+            $data=[
+                "mensaje"=> "El usuario ya esta baneado",
+                "status"=> 400,
+            ];
+            return response()->json($data,400);
+        }
+
         $usuario->is_banned=true;
         $usuario->save();
 
         $data=[
             "mensaje"=>"El usuario ha sido baneado con exito",
+            "status"=>200,
+        ];
+        return response()->json($data,200);
+    }
+
+    public function desbanUser($identificador)
+    {
+        $usuario=User::find($identificador);
+        if(!$usuario){
+            $data=[
+                "mensaje"=> "Usuario no encontrado",
+                "status"=> 400,
+            ];
+            return response()->json($data,400);
+        }
+        if($usuario->is_banned==false){
+            $data=[
+                "mensaje"=> "Usuario no tiene un ban activo",
+                "status"=> 400,
+            ];
+            return response()->json($data,400);
+        }
+
+        $usuario->is_banned=false;
+        $usuario->save();
+
+        $data=[
+            "mensaje"=>"El usuario ha sido desbaneado con exito",
             "status"=>200,
         ];
         return response()->json($data,200);

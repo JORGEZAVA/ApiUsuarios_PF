@@ -2,8 +2,6 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
-use Illuminate\Http\Request;
-use Illuminate\Routing\Router;
 use Illuminate\Support\Facades\Route;
 
 
@@ -26,6 +24,7 @@ Route::middleware("auth:sanctum")->group(function(){
     Route::patch("/usuarios/{id}", [UserController::class, "updatePartial"]);
 
     Route::middleware("admin")->group(function(){
+        
         Route::get('/admin', function () {
             return response()->json(["mensaje"=>"Bienvenido al panel de administracion"],200);
         });
@@ -33,6 +32,8 @@ Route::middleware("auth:sanctum")->group(function(){
         Route::put('/usuarios/{id}/admin', [UserController::class, "makeAdmin"]);
     
         Route::put('/usuarios/{id}/ban', [UserController::class, "banUser"]);
+
+        Route::put('/usuarios/{id}/desban', [UserController::class, "desbanUser"]);
     
     });
     
