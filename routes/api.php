@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserController;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Request;
 use Illuminate\Support\Facades\Route;
 
 
@@ -39,6 +41,13 @@ Route::middleware("auth:sanctum")->group(function(){
     
 });
 
+Route::middleware('auth:sanctum')->get('/validarToken', function (Request $request) {
+    $usuario= Auth::user();
+    return response()->json([
+        'message' => 'Token válido',
+        'user' => $usuario, 
+    ]);
+});
 
 
 
