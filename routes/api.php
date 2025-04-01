@@ -45,6 +45,7 @@ Route::middleware('auth:sanctum')->get('/validarToken', function (Request $reque
     $usuario= Auth::user();
     return response()->json([
         'message' => 'Token válido',
+        "status"=>200,
         'user' => $usuario, 
     ]);
 });

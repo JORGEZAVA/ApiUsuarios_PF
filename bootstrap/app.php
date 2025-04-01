@@ -17,10 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => Administrador::class,
         ]);
-        $middleware = [
-            Cors::class,
-        ];
-        
+        $middleware->append(Cors::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
