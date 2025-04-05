@@ -75,6 +75,7 @@ class UserController extends Controller
             "name"=> "required|alpha|min:3|max:255|string",
             "email"=> "required|email|unique:users,email," . $usuario->id,
             "password"=> "required|string|min:4",
+            "biografia"=> "string|max:255",
         ]);
 
         if($validator->fails()){
@@ -131,6 +132,7 @@ class UserController extends Controller
             "name"=> "alpha|min:3|max:255|string",
             "email"=> "email|unique:users,email," . $usuario->id,
             "password"=> "string|min:4",
+            "biografia"=> "string|max:255",
         ]);
 
         if($validator->fails()){
@@ -149,6 +151,9 @@ class UserController extends Controller
         }
         if($request->has("password")){
             $usuario->password=$request->password;
+        }
+        if($request->has("biografia")){
+            $usuario->biografia=$request->biografia;
         }
 
         $usuario->save();

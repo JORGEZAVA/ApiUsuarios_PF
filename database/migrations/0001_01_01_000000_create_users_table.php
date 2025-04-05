@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('email')->unique();
             $table->string('password');
+            $table->string("biografia")->nullable();
             $table->string('role')->default('user');
             $table->boolean("is_banned")->default(false);
             $table->rememberToken();

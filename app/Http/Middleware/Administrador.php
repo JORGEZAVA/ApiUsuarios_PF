@@ -16,5 +16,6 @@ class Administrador
             return response()->json(["mensaje"=>"No tienes permisos para acceder a esta ruta"],403);
         }
         return $next($request);
+        
     }
 }
