@@ -18,11 +18,14 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        "image"
     ];
 
     protected $hidden = [
         'password',
         'remember_token',
+        "created_at",
+        "updated_at",
     ];
 
     protected function casts(): array
@@ -30,6 +33,8 @@ class User extends Authenticatable
         return [
             'password' => 'hashed',
             "is_admin"=>  "boolean",
+            "is_banned"=>  "boolean",
         ];
     }
+    
 }

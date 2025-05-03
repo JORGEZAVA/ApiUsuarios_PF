@@ -8,6 +8,7 @@ use App\Http\Requests\CreateUserRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Laravel\Pail\ValueObjects\Origin\Console;
 
 class UserController extends Controller
 {
@@ -15,7 +16,14 @@ class UserController extends Controller
     public function index()
     {
         $usuarios= User::paginate(10);
-        return response()->json($usuarios, 200);
+
+        $data=[
+            "mensaje"=> "Usuarios obtenidos con exito",
+            "status"=>200,
+            "usuarios"=> $usuarios,
+        ];
+
+        return response()->json($data, 200);
     }
 
     public function store(CreateUserRequest $request)
@@ -62,7 +70,8 @@ class UserController extends Controller
 
     
     public function update(Request $request, $identificador)
-    {
+    {   
+        
         $usuario=User::find($identificador);
         if(!$usuario){
             $data=[
@@ -76,6 +85,7 @@ class UserController extends Controller
             "email"=> "required|email|unique:users,email," . $usuario->id,
             "password"=> "required|string|min:4",
             "biografia"=> "string|max:255",
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         if($validator->fails()){
@@ -88,7 +98,18 @@ class UserController extends Controller
 
         $usuario->name=$request->name;
         $usuario->email=$request->email;
-        $usuario->password=$request->password;
+        $usuario->password=Hash::make($request->password) ;
+        $usuario->biografia=$request->biografia;
+
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            // Leer el contenido del archivo
+            $imageData = file_get_contents($file->getRealPath());
+            $imageData = base64_encode($imageData);
+            $usuario->image=$imageData;
+        } else {
+            $imageData = null;
+        }
 
         $usuario->save();
 
@@ -120,6 +141,7 @@ class UserController extends Controller
 
     public function updatePartial(Request $request, $identificador)
     {
+
         $usuario=User::find($identificador);
         if(!$usuario){
             $data=[
@@ -128,11 +150,13 @@ class UserController extends Controller
             ];
             return response()->json($data,400);
         }
+        
         $validator=Validator::make($request->all(),[
             "name"=> "alpha|min:3|max:255|string",
-            "email"=> "email|unique:users,email," . $usuario->id,
+            "email"=> "email|unique:users,email," . $usuario->id, // Ha excepcion del usuario que se esta editando
             "password"=> "string|min:4",
             "biografia"=> "string|max:255",
+            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
 
         if($validator->fails()){
@@ -150,17 +174,26 @@ class UserController extends Controller
             $usuario->email=$request->email;
         }
         if($request->has("password")){
-            $usuario->password=$request->password;
+            $usuario->password=Hash::make($request->password) ;
         }
         if($request->has("biografia")){
             $usuario->biografia=$request->biografia;
         }
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            // Leer el contenido del archivo
+            $imageData = file_get_contents($file->getRealPath());
+            // Convertir a base64
+            $imageData = base64_encode($imageData);
+            $usuario->image=$imageData;
+        } 
 
         $usuario->save();
 
         $data=[
             "mensaje"=>"El usuario ha sido actualizado con exito",
             "status"=>200,
+            "resultado"=>$request->all(),
         ];
         return response()->json($data,200);
         
@@ -176,14 +209,14 @@ class UserController extends Controller
             ];
             return response()->json($data,400);
         }
-        if($usuario->rol="admin"){
+        if($usuario->role == "admin"){
             $data=[
                 "mensaje"=> "El usuario ya es administrador",
                 "status"=> 400,
             ];
             return response()->json($data,400);
         }
-        $usuario->rol="admin";
+        $usuario->role="admin";
         $usuario->save();
 
         $data=[
@@ -196,6 +229,7 @@ class UserController extends Controller
     public function banUser($identificador)
     {
         $usuario=User::find($identificador);
+        
         if(!$usuario){
             $data=[
                 "mensaje"=> "Usuario no encontrado",
@@ -225,6 +259,7 @@ class UserController extends Controller
     public function desbanUser($identificador)
     {
         $usuario=User::find($identificador);
+
         if(!$usuario){
             $data=[
                 "mensaje"=> "Usuario no encontrado",
@@ -246,6 +281,7 @@ class UserController extends Controller
         $data=[
             "mensaje"=>"El usuario ha sido desbaneado con exito",
             "status"=>200,
+            
         ];
         return response()->json($data,200);
     }
