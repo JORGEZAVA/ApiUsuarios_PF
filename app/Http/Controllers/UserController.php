@@ -13,9 +13,24 @@ use Laravel\Pail\ValueObjects\Origin\Console;
 class UserController extends Controller
 {
     
-    public function index()
-    {
-        $usuarios= User::paginate(10);
+    public function index(Request $request){
+
+        $search=$request->get("search",null);
+
+        if($search){
+            $usuarios= User::query()->where("name","like","%"."$search"."%")->paginate(10);
+        }else{
+            $usuarios= User::paginate(10);
+        }
+
+        if($usuarios->count()==0){
+            $data=[
+                "mensaje"=> "No se encontraron usuarios",
+                "status"=> 404,
+            ];
+
+            return response()->json($data,404);
+        }
 
         $data=[
             "mensaje"=> "Usuarios obtenidos con exito",
@@ -64,7 +79,13 @@ class UserController extends Controller
             return response()->json($data,400);
         }
 
-        return response()->json($usuario,200);
+        $data=[
+            "mensaje"=> "Usuario obtenido con exito",
+            "status"=>200,
+            "usuario"=> $usuario,
+        ];
+
+        return response()->json($data,200);
         
     }
 

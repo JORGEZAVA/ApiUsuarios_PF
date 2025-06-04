@@ -16,11 +16,6 @@ class LoginRequest extends FormRequest
         return true;
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
@@ -33,11 +28,12 @@ class LoginRequest extends FormRequest
     {
         $errors = $validator->errors();
 
-        $response = response()->json([
-            'message' => 'Validacion fallada',
+        $data=[
+            'mensaje' => 'Validacion fallada',
             'errors' => $errors,
             'status' => 422,
-        ], 422);
+        ];
+        $response = response()->json($data, 422);
 
         throw new ValidationException($validator, $response);
     }
