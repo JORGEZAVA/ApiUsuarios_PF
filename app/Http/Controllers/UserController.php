@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CreateUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -41,8 +42,7 @@ class UserController extends Controller
         return response()->json($data, 200);
     }
 
-    public function store(CreateUserRequest $request)
-    {
+    public function store(CreateUserRequest $request){
         $usuario= User::create([
             "name"=>$request->name,
             "email"=>$request->email,
@@ -67,8 +67,7 @@ class UserController extends Controller
 
     }
 
-    public function show($identificador)
-    {
+    public function show($identificador){
         $usuario= User::find($identificador);
 
         if(!$usuario){
@@ -89,60 +88,7 @@ class UserController extends Controller
         
     }
 
-    
-    public function update(Request $request, $identificador)
-    {   
-        
-        $usuario=User::find($identificador);
-        if(!$usuario){
-            $data=[
-                "mensaje"=> "Usuario no encontrado",
-                "status"=> 400,
-            ];
-            return response()->json($data,400);
-        }
-        $validator=Validator::make($request->all(),[
-            "name"=> "required|alpha|min:3|max:255|string",
-            "email"=> "required|email|unique:users,email," . $usuario->id,
-            "password"=> "required|string|min:4",
-            "biografia"=> "string|max:255",
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);
-
-        if($validator->fails()){
-            $data=[
-                "mensaje"=> "Error en la validacion de datos",
-                "errores"=> $validator->errors(),
-            ];
-            return response()->json($data,400);
-        }
-
-        $usuario->name=$request->name;
-        $usuario->email=$request->email;
-        $usuario->password=Hash::make($request->password) ;
-        $usuario->biografia=$request->biografia;
-
-        if ($request->hasFile('image')) {
-            $file = $request->file('image');
-            // Leer el contenido del archivo
-            $imageData = file_get_contents($file->getRealPath());
-            $imageData = base64_encode($imageData);
-            $usuario->image=$imageData;
-        } else {
-            $imageData = null;
-        }
-
-        $usuario->save();
-
-        $data=[
-            "mensaje"=>"El usuario ha sido actualizado con exito",
-            "status"=>200,
-        ];
-        return response()->json($data,200);
-    }
-
-    public function destroy($identificador)
-    {
+    public function destroy($identificador){
         $usuario= User::find($identificador);
         if(!$usuario){
             $data=[
@@ -160,8 +106,7 @@ class UserController extends Controller
         return response()->json($data,200);
     }
 
-    public function updatePartial(Request $request, $identificador)
-    {
+    public function updatePartial(UpdateUserRequest $request, $identificador){
 
         $usuario=User::find($identificador);
         if(!$usuario){
@@ -172,22 +117,6 @@ class UserController extends Controller
             return response()->json($data,400);
         }
         
-        $validator=Validator::make($request->all(),[
-            "name"=> "alpha|min:3|max:255|string",
-            "email"=> "email|unique:users,email," . $usuario->id, // Ha excepcion del usuario que se esta editando
-            "password"=> "string|min:4",
-            "biografia"=> "string|max:255",
-            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-        ]);
-
-        if($validator->fails()){
-            $data=[
-                "mensaje"=> "Error en la validacion de datos",
-                "errores"=> $validator->errors(),
-            ];
-            return response()->json($data,400);
-        }
-
         if($request->has("name")){
             $usuario->name=$request->name;
         }
@@ -220,8 +149,7 @@ class UserController extends Controller
         
     }
 
-    public function makeAdmin($identificador)
-    {
+    public function makeAdmin($identificador){
         $usuario=User::find($identificador);
         if(!$usuario){
             $data=[
@@ -247,8 +175,7 @@ class UserController extends Controller
         return response()->json($data,200);
     }
 
-    public function banUser($identificador)
-    {
+    public function banUser($identificador){
         $usuario=User::find($identificador);
         
         if(!$usuario){
@@ -277,8 +204,7 @@ class UserController extends Controller
         return response()->json($data,200);
     }
 
-    public function desbanUser($identificador)
-    {
+    public function desbanUser($identificador){
         $usuario=User::find($identificador);
 
         if(!$usuario){

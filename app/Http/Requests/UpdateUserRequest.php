@@ -6,44 +6,51 @@ use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Contracts\Validation\Validator;
 use Illuminate\Validation\ValidationException;
 
-class CreateUserRequest extends FormRequest
-{
-    public function authorize(): bool
-    {
+class UpdateUserRequest extends FormRequest{
+    public function authorize(): bool{
         return true;
     }
 
-    public function rules(): array
-    {
+    public function rules(): array{
         return [
-            "name"=> "required|min:3|max:255|string",
-            "email"=> "required|email|unique:users,email",
-            "password"=> "required|string|min:4",
+            "name"=> "alpha|min:3|max:255|string",
+            "email"=> "email|unique:users,email," . $this->route('id'),
+            "password"=> "string|min:4",
+            "biografia"=> "string|min:3|max:255",
+            'image' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ];
     }
 
-    public function attributes(): array
-    {
+    public function attributes(): array{
         return [
             'name' => 'nombre',
             'email' => 'correo',
             'password' => 'contraseña',
+            "biografia" => "biografia",
+            'image' => 'imagen',
         ];
     }
 
     public function messages(): array{
         return [
-            "required" => "El campo :attribute es requerido",
 
             "name.min" => "El campo :attribute debe tener al menos :min caracteres",
             "name.max" => "El campo :attribute debe tener al menos :max caracteres",
             "name.string" => "El campo :attribute debe ser un texto",
+            "name.alpha" => "El campo :attribute debe ser un texto",
 
             "email.email" => "El campo :attribute debe ser un correo electronico",
             "email.unique" => "El campo :attribute debe ser un correo electronico unico",
 
             "password.string" => "El campo :attribute debe ser un texto",
             "password.min" => "El campo :attribute debe tener al menos :min caracteres",
+
+            "biografia.max" => "El campo :attribute debe ser como maximo :max caracteres",
+            "biografia.min" => "El campo :attribute debe ser como minimo :min caracteres",
+
+            "image.image" => "El campo :attribute debe ser una imagen",
+            "image.mimes" => "El campo :attribute debe ser una imagen con extensiones jpeg,png,jpg,gif,svg",
+            "image.max" => "El campo :attribute debe ser una imagen con un tamaño maximo de 2MB",
         ];
     }
 
